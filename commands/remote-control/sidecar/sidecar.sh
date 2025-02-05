@@ -20,12 +20,13 @@ IPADNAME=$1
 osascript <<EOF
 tell application "System Settings"
     activate
+    delay 2
     reveal pane id "com.apple.Displays-Settings.extension"
 end tell
 
 tell application "System Events"
     tell process "System Settings"
-        delay 3 -- Wait for UI to be ready
+        delay 2 -- Wait for UI to be ready
 
         -- Retry checking for the Displays window up to 5 times
         set windowReady to false
@@ -34,19 +35,19 @@ tell application "System Events"
                 set windowReady to true
                 exit repeat
             else
-                delay 1 -- Wait before checking again
+                delay .25 -- Wait before checking again
             end if
         end repeat
 
         -- If the Displays window is still not available, show an error
         if not windowReady then
-            display dialog "Error: The Displays window is not available in System Settings." buttons {"OK"} default button "OK"
+            display dialog "Error: The Displays window is not available in System Settings, or the extension name has changed. Please submit an issue on GitHub." buttons {"OK"} default button "OK"
             return
         end if
 
         -- Target the "Add" button
         try
-            tell pop up button "Add" of group 1 of group 2 of splitter group 1 of group 1 of window "Displays"
+            tell pop up button id "plus" of group 1 of group 2 of splitter group 1 of group 1 of window "Displays"
                 click
                 repeat until exists of menu "Add"
                     delay 0.2
@@ -60,6 +61,10 @@ tell application "System Events"
                     set doc_response to display dialog "iPad not appearing in Display menu." buttons {"OK", "Sidecar Docs"} default button "OK"
                     
                     if button returned of doc_response is "Sidecar Docs" then
+                        open location "https://support.apple.com/guide/mac-help/use-your-ipad-as-a-second-display-mchlf3c6f7ae/mac"
+                    end if
+
+                    if button returned of doc_response is "GitHub Issue" then
                         open location "https://support.apple.com/guide/mac-help/use-your-ipad-as-a-second-display-mchlf3c6f7ae/mac"
                     end if
                     
